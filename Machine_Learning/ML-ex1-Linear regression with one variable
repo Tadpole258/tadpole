@@ -1,0 +1,86 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
+
+from mpl_toolkits.mplot3d import Axes3D
+from sklearn.linear_model import LinearRegression
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+
+%matplotlib inline
+
+# Load data from CSV file
+# - column 1: population (x)
+# - column 2: profit (y)
+data = np.loadtxt('data/ml-ex1/ex1data1.txt', delimiter=',')
+
+# Separate features (x) from target (y)
+X, y = np.hsplit(data, 2)
+
+# Number of examples
+m = y.size
+
+# Fit a linear regression model (without regularization)
+model = LinearRegression()
+model.fit(X, y)
+#out:LinearRegression(copy_X=True, fit_intercept=True, n_jobs=1, normalize=False)
+# Obtain coefficients theta0 and theta1 from model
+theta0, theta1 = model.intercept_, model.coef_[0]
+theta0, theta1
+#out:(array([-3.89578088]), array([ 1.19303364]))
+
+# Plot data and regression line
+plt.plot(X, y, 'bx', label='Data')
+plt.plot(X, model.predict(X), 'r-', label='Regression')
+plt.xlabel('Population')
+plt.ylabel('Profit')
+plt.legend()
+#out:<matplotlib.legend.Legend at 0x10eb7a710>
+
+# Training mean squared error
+np.mean((model.predict(X) - y) ** 2)
+#Out:8.9539427519503558
+# Training score
+model.score(X, y)
+#Out:0.70203155378413973
+# Predict profit for populations of 35.000 and 70.000 
+model.predict(np.array([[3.5], [7.0]])) * 10000
+#Out:array([[  2798.36876352],
+       [ 44554.54631015]])
+# LinearRegression above internally added a column vector of 1s.
+# For the following calculations, this must be done explicitly.
+X = np.c_[np.ones(m), X]
+# Compute least-squares solution with np.linalg.lstsq. 
+# This is what LinearRegression actually does under the hood.
+Theta = np.linalg.lstsq(X, y)[0]
+Theta
+#Out[87]:array([[-3.89578088],
+       [ 1.19303364]])
+
+# Cost function (mean squared error)
+def cost(X, y, Theta):
+    diff = X.dot(Theta) - y
+    return np.sum(diff * diff, axis=0) / y.size
+# Create a 50*50 grid for Theta0 and Theta1 ranges
+Theta_grid = np.mgrid[-10:10:50j, -1:4:50j]
+
+# Theta values in an array of shape (2500,2)
+Thetas = np.c_[Theta_grid[0].ravel(), Theta_grid[1].ravel()]
+
+# Compute costs on grid points
+costs = cost(X, y, Thetas.T)
+
+# Cost values reshaped to grid
+cost_grid = costs.reshape(Theta_grid[0].shape)
+
+# Contour plot of cost function
+plt.contour(Theta_grid[0], Theta_grid[1], cost_grid, levels=[20, 40, 80, 160, 320, 640, 1280])
+
+# Plot optmimum
+plt.plot(Theta[0], Theta[1], 'rx')
+
+# Title and axis labels
+plt.xlabel('Theta0')
+plt.xlabel('Theta1')
+plt.title('Cost function')
+
