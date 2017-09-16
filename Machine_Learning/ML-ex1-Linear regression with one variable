@@ -62,7 +62,7 @@ def cost(X, y, Theta):
     diff = X.dot(Theta) - y
     return np.sum(diff * diff, axis=0) / y.size
 # Create a 50*50 grid for Theta0 and Theta1 ranges
-Theta_grid = np.mgrid[-10:10:50j, -1:4:50j]
+Theta_grid = np.mgrid[-40:40:100j, -5:6:100j]
 
 # Theta values in an array of shape (2500,2)
 Thetas = np.c_[Theta_grid[0].ravel(), Theta_grid[1].ravel()]
